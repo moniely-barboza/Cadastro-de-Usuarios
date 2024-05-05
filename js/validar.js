@@ -130,64 +130,72 @@ function validarSenha(e){
     }
 }
 
+/** No caso da senha ser válida, a função deve retornar o nível de segurança da senha: ‘fraca’, ‘moderada’, ou ‘forte’
+*/
 function nivelSegurança(e){
-    let senhaTrimado = e.target.value.trim();
+    let senhaValida = e.target.value;
 
-    if (senhaForte()) {
+    if (senhaForte(senhaValida)) {
         meter.value = 30;
         result.textContent = "Senha Forte";
         result.style.color = "green"; 
     }
-    else if (senhaModerada()) {
+    else if (senhaModerada(senhaValida)) {
         meter.value = 20;
         result.textContent = "Senha Moderada"; 
         result.style.color = "orange";
     }
-    else if (senhaFraca()) {
+    else if (senhaFraca(senhaValida)) {
         meter.value = 10;
         result.textContent = "Senha Fraca"; 
         result.style.color = "red";
     }
+}
 
-    function senhaFraca() {
-        return nCaracteres(senhaTrimado) <= 8
-            && nEspeciais(e.target.value) >= 1
-            && nNumeros(e.target.value) >= 1;
-    }
+/** - Uma senha fraca tem comprimento menor que 8 caracteres, contendo pelo menos um caractere especial e um número;
+ */
+function senhaFraca(senhaValida) {
+    return nCaracteres(senhaValida.trim()) <= 8
+        && nEspeciais(senhaValida) >= 1
+        && nNumeros(senhaValida) >= 1;
+}
 
-    function senhaModerada() {
-        return nCaracteres(senhaTrimado) > 8
-            && nEspeciais(e.target.value) >= 1
-            && nNumeros(e.target.value) >= 1
-            && nMaiusculas(e.target.value) >= 1;
-    }
+/** - Uma senha moderada tem mais de 8 caracteres, contendo pelo menos um caractere especial, um número e uma letra maiúscula;
+ */
+function senhaModerada(senhaValida) {
+    return nCaracteres(senhaValida.trim()) > 8
+        && nEspeciais(senhaValida) >= 1
+        && nNumeros(senhaValida) >= 1
+        && nMaiusculas(senhaValida) >= 1;
+}
 
-    function senhaForte() {
-        return nCaracteres(senhaTrimado) > 12
-            && nEspeciais(e.target.value) > 1
-            && nNumeros(e.target.value) > 1
-            && nMaiusculas(e.target.value) > 1;
-    }
+/** - Uma senha forte tem mais de 12 caracteres, contendo mais de um caracter especial, mais de um número e mais de uma letra maiúscula.
+ */
+function senhaForte(senhaValida) {
+    return nCaracteres(senhaValida.trim()) > 12
+        && nEspeciais(senhaValida) > 1
+        && nNumeros(senhaValida) > 1
+        && nMaiusculas(senhaValida) > 1;
 }
 
 function nCaracteres(string) {
     return string.length;
 }
 
-function nEspeciais(senha) {
+function nEspeciais(string) {
     const regexEspeciais = /[@#%&!+]/g;
-    const especiais = senha.match(regexEspeciais);
+    const especiais = string.match(regexEspeciais);
     return especiais ? especiais.length : 0;
 }
 
-function nNumeros(senha) {
+function nNumeros(string) {
     const regexNumeros = /[0-9]/g;
-    const numeros = senha.match(regexNumeros);
+    const numeros = string.match(regexNumeros);
     return numeros ? numeros.length : 0;
 }
 
-function nMaiusculas(senha) {
+function nMaiusculas(string) {
     const regexMaiusculas = /[A-Z]/g;
-    const maiusculas = senha.match(regexMaiusculas);
+    const maiusculas = string.match(regexMaiusculas);
     return maiusculas ? maiusculas.length : 0;
 }
