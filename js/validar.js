@@ -16,7 +16,7 @@ let meter = document.querySelector("#passStrengthMeter")
 let result = document.querySelector("#inputResult");
 
 // Regex
-const regexNome = /^[A-Z][a-z]+(?: [A-Z][a-z]+)+$/;
+const regexNome = /^[A-Z][a-z]+(?: [A-Z][a-z]+)+$/; // [Nome] + espaço + [Sobrenome]
 const regexAno = /^[0-9]{4}$/;
 const regexEmail = /^[a-zA-Z0-9\.]+@[a-zA-Z0-9]+\.(com|br|net|org)$/; // Assumiremos que também é válido conter "." antes do @
 const regexSenha = /^(?=.*[@#%&!+])(?=.*[0-9])(?=.*[a-zA-Z])[a-zA-Z0-9@#%&!+]{6,20}$/;
@@ -30,18 +30,19 @@ ano.addEventListener('focusout', validarAno);
 email.addEventListener('focusout', validarEmail);
 senha.addEventListener('focusout', validarSenha);
 
+/** Restrição 1: O nome do usuário somente deve conter letras e deve ser de cumprimento maior a 6 */
 function validarNome(e){ 
-    /* Restrição 1: O nome do usuário somente deve conter letras e deve ser de cumprimento maior a 6 */
 
     const nomeTrimado = e.target.value.trim();
-    console.log(e.target.value);  
+    const nomeSemEspacos = nomeTrimado.replace(/\s+/g, '');
+    console.log(nomeTrimado);  
 
     if(nomeTrimado.match(regexNome) == null){
         nomeHelp.textContent = "Formato de nome inválido"; 
         nomeHelp.style.color="red";
     }
-    else if(nCaracteres(nomeTrimado) <= 6){
-        nomeHelp.textContent = "O nome deve ter mais de 6 caracteres"; 
+    else if(nCaracteres(nomeSemEspacos) < 6){
+        nomeHelp.textContent = "O nome deve ter ao menos 6 caracteres"; 
         nomeHelp.style.color="red";
     }
     else{
@@ -49,8 +50,8 @@ function validarNome(e){
     }       
 }
 
+/** Restrição 2: O ano de nascimento deve considerar pessoas nascidas no intervalo de tempo de 1900 a 2022 */
 function validarAno(e){
-    /* Restrição 2: O ano de nascimento deve considerar pessoas nascidas no intervalo de tempo de 1900 a 2022 */
 
     const anoTrimado = e.target.value.trim();
     console.log(ano.value);
@@ -59,24 +60,21 @@ function validarAno(e){
         anoHelp.textContent = "Formato de ano inválido";
         anoHelp.style.color="red";
     }
-    else{    
-        if( parseInt(anoTrimado) > parseInt(anoMax) ){
-            anoHelp.textContent = `Ano inválido. O ano não pode ser maior que ${anoMax}.`;
-            anoHelp.style.color="red";
-        }
-        else if( parseInt(anoTrimado) < parseInt(anoMin) ){
-            anoHelp.textContent = `Ano inválido. O ano não pode ser menor que ${anoMin}.`;
-            anoHelp.style.color="red";
-        }
-        else{
-            anoHelp.textContent="";
-        }        
-        
+    else if(parseInt(anoTrimado) > parseInt(anoMax)){
+        anoHelp.textContent = `Ano inválido. O ano não pode ser maior que ${anoMax}.`;
+        anoHelp.style.color="red";
     }
+    else if(parseInt(anoTrimado) < parseInt(anoMin)){
+        anoHelp.textContent = `Ano inválido. O ano não pode ser menor que ${anoMin}.`;
+        anoHelp.style.color="red";
+    }
+    else{
+        anoHelp.textContent="";
+    }    
 }
 
+/** Restrição 3: O email deverá conter letras e números seguido do @ seguido de caracteres e/ou números seguido de . e finalizando em br, com, net, org */
 function validarEmail(e){ 
-    /* Restrição 3: O email deverá conter letras e números seguido do @ seguido de caracteres e/ou números seguido de . e finalizando em br, com, net, org */
     
     const emailTrimado = e.target.value.trim();
     console.log(e.target.value); 
@@ -90,69 +88,85 @@ function validarEmail(e){
     }
 }
 
+/** Restrição 4: Para que uma senha seja considerada válida, deve:
+    - ter entre 6 e 20 caracteres,
+    - ter pelo menos uma ocorrência de:
+        - caractere especial, por exemplo: [@, #, %, &, !,+]
+        - número
+        - letra [a-z,A-Z]
+        - Não conter o nome ou o ano de nascimento do usuário
+*/    
 function validarSenha(e){
-    /* Restrição 4: Para que uma senha seja considerada válida, deve:
-        - ter entre 6 e 20 caracteres,
-        - ter pelo menos uma ocorrência de:
-            - caractere especial, por exemplo: [@, #, %, &, !,+]
-            - número
-            - letra [a-z,A-Z]
-            - Não conter o nome ou o ano de nascimento do usuário
-    */
     
-    let senhaValida = false;
+    let senhaValida = true;
+    const nomeSemEspacos = nome.value.trim().replace(/\s+/g, '');
     const senhaTrimado = e.target.value.trim();
-    console.log(e.target.value); 
-
+    
     if(senhaTrimado.match(regexSenha) == null){
         senhaHelp.textContent = "Senha inválida"; 
         senhaHelp.style.color = "red";
+        senhaValida = false;
     }
-    /*
-    else if(nome.value.trim() !== "" && senhaTrimado.toLowerCase().includes(nome.value.trim().toLowerCase())){
-        senhaHelp.textContent = "Senha não pode conter o nome do usuário";
+    else if(nome.value.trim() !== "" && senhaTrimado.includes(nomeSemEspacos)){
+        senhaHelp.textContent = "Senha inválida. Senha não pode conter o nome do usuário";
         senhaHelp.style.color = "red";
+        senhaValida = false;
     }
-    else if(ano.value.trim() !== "" && senhaTrimado.includes(ano.value.trim())){
-        senhaHelp.textContent = "Senha não pode conter o ano de nascimento do usuário";
+    else if(ano.value.trim() != "" && senhaTrimado.includes(ano.value.trim())){
+        senhaHelp.textContent = "Senha inválida. Senha não pode conter o ano de nascimento do usuário";
         senhaHelp.style.color = "red";
+        senhaValida = false;
     }
-    */
     else{
         senhaHelp.textContent = "";
-        senhaValida = true;
     }
 
     if(senhaValida){
-        // Senha Forte
-        if (e.target.value.trim().length > 12
-                && nEspeciais(e.target.value) > 1
-                && nNumeros(e.target.value) > 1
-                && nMaiusculas(e.target.value) > 1) {
-            meter.value = 30;
-            meter.style.color="green";
-            result.textContent = "Senha Forte"; 
-            result.style.color="green";
-        }
-        // Senha Moderada
-        else if (e.target.value.trim().length > 8
-                && nEspeciais(e.target.value) >= 1
-                && nNumeros(e.target.value) >= 1
-                && nMaiusculas(e.target.value) >= 1) {
-            meter.value = 20;
-            meter.style.color="orange";
-            result.textContent = "Senha Moderada"; 
-            result.style.color="orange";
-        }
-        // Senha Fraca
-        else if (e.target.value.trim().length <= 8
-                && nEspeciais(e.target.value) >= 1
-                && nNumeros(e.target.value) >= 1) {
-            meter.value = 11;
-            meter.style.color="orange";
-            result.textContent = "Senha Fraca"; 
-            result.style.color="orange";
-        }
+        nivelSegurança(e);
+    }
+    else{
+        meter.value = 0;
+        result.textContent = "";
+    }
+}
+
+function nivelSegurança(e){
+    let senhaTrimado = e.target.value.trim();
+
+    if (senhaForte()) {
+        meter.value = 30;
+        result.textContent = "Senha Forte";
+        result.style.color = "green"; 
+    }
+    else if (senhaModerada()) {
+        meter.value = 20;
+        result.textContent = "Senha Moderada"; 
+        result.style.color = "orange";
+    }
+    else if (senhaFraca()) {
+        meter.value = 10;
+        result.textContent = "Senha Fraca"; 
+        result.style.color = "red";
+    }
+
+    function senhaFraca() {
+        return nCaracteres(senhaTrimado) <= 8
+            && nEspeciais(e.target.value) >= 1
+            && nNumeros(e.target.value) >= 1;
+    }
+
+    function senhaModerada() {
+        return nCaracteres(senhaTrimado) > 8
+            && nEspeciais(e.target.value) >= 1
+            && nNumeros(e.target.value) >= 1
+            && nMaiusculas(e.target.value) >= 1;
+    }
+
+    function senhaForte() {
+        return nCaracteres(senhaTrimado) > 12
+            && nEspeciais(e.target.value) > 1
+            && nNumeros(e.target.value) > 1
+            && nMaiusculas(e.target.value) > 1;
     }
 }
 
