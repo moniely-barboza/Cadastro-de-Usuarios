@@ -25,29 +25,48 @@ const regexSenha = /^(?=.*[@#%&!+])(?=.*[0-9])(?=.*[a-zA-Z])[a-zA-Z0-9@#%&!+]{6,
 const anoMin = "1900"; // Ano de Nascimento Mínimo
 const anoMax = "2022"; // Ano de Nascimento Máximo
 
+
+// Validação do formulário
+let nomeValido = false;
+let anoValido = false;
+let emailValido = false;
+let senhaValida = false;
+
 nome.addEventListener('focusout', validarNome);
 ano.addEventListener('focusout', validarAno);
 email.addEventListener('focusout', validarEmail);
 senha.addEventListener('focusout', validarSenha);
 
+function validarFormulario() {
+    if (nomeValido && anoValido && emailValido && senhaValida) {
+        alert("Seus dados foram registrados");
+    }
+    else {
+        alert("Seus dados não foram registrados");
+    }
+}
+
+
 /** Restrição 1: O nome do usuário somente deve conter letras e deve ser de cumprimento maior a 6 */
 function validarNome(e){ 
-
     const nomeTrimado = e.target.value.trim();
     const nomeSemEspacos = nomeTrimado.replace(/\s+/g, '');
     console.log(nomeTrimado);  
+
+    nomeValido = false;
 
     if(nomeTrimado.match(regexNome) == null){
         nomeHelp.textContent = "Formato de nome inválido"; 
         nomeHelp.style.color="red";
     }
-    else if(nCaracteres(nomeSemEspacos) < 6){
+    else if(nomeSemEspacos.length < 6){
         nomeHelp.textContent = "O nome deve ter ao menos 6 caracteres"; 
         nomeHelp.style.color="red";
     }
     else{
         nomeHelp.textContent = "";
-    }       
+        nomeValido = true;
+    }
 }
 
 /** Restrição 2: O ano de nascimento deve considerar pessoas nascidas no intervalo de tempo de 1900 a 2022 */
@@ -55,6 +74,8 @@ function validarAno(e){
 
     const anoTrimado = e.target.value.trim();
     console.log(ano.value);
+
+    anoValido = false;
 
     if(anoTrimado.match(regexAno) == null){
         anoHelp.textContent = "Formato de ano inválido";
@@ -70,7 +91,8 @@ function validarAno(e){
     }
     else{
         anoHelp.textContent="";
-    }    
+        anoValido = true;
+    }
 }
 
 /** Restrição 3: O email deverá conter letras e números seguido do @ seguido de caracteres e/ou números seguido de . e finalizando em br, com, net, org */
@@ -79,12 +101,15 @@ function validarEmail(e){
     const emailTrimado = e.target.value.trim();
     console.log(e.target.value); 
 
+    emailValido = false;
+
     if(emailTrimado.match(regexEmail) == null){
         emailHelp.textContent = "Formato de email inválido"; 
         emailHelp.style.color="red";
     }
     else{
         emailHelp.textContent = "";
+        emailValido = true;
     }
 }
 
@@ -98,27 +123,26 @@ function validarEmail(e){
 */    
 function validarSenha(e){
     
-    let senhaValida = true;
     const nomeSemEspacos = nome.value.trim().replace(/\s+/g, '');
     const senhaTrimado = e.target.value.trim();
+    
+    senhaValida = false;
     
     if(senhaTrimado.match(regexSenha) == null){
         senhaHelp.textContent = "Senha inválida"; 
         senhaHelp.style.color = "red";
-        senhaValida = false;
     }
     else if(nome.value.trim() !== "" && senhaTrimado.includes(nomeSemEspacos)){
         senhaHelp.textContent = "Senha inválida. Senha não pode conter o nome do usuário";
         senhaHelp.style.color = "red";
-        senhaValida = false;
     }
     else if(ano.value.trim() != "" && senhaTrimado.includes(ano.value.trim())){
         senhaHelp.textContent = "Senha inválida. Senha não pode conter o ano de nascimento do usuário";
         senhaHelp.style.color = "red";
-        senhaValida = false;
     }
     else{
         senhaHelp.textContent = "";
+        senhaValida = true;
     }
 
     if(senhaValida){
@@ -155,7 +179,7 @@ function nivelSegurança(e){
 /** - Uma senha fraca tem comprimento menor que 8 caracteres, contendo pelo menos um caractere especial e um número;
  */
 function senhaFraca(senhaValida) {
-    return nCaracteres(senhaValida.trim()) <= 8
+    return senhaValida.trim().length <= 8
         && nEspeciais(senhaValida) >= 1
         && nNumeros(senhaValida) >= 1;
 }
@@ -163,7 +187,7 @@ function senhaFraca(senhaValida) {
 /** - Uma senha moderada tem mais de 8 caracteres, contendo pelo menos um caractere especial, um número e uma letra maiúscula;
  */
 function senhaModerada(senhaValida) {
-    return nCaracteres(senhaValida.trim()) > 8
+    return senhaValida.trim().length > 8
         && nEspeciais(senhaValida) >= 1
         && nNumeros(senhaValida) >= 1
         && nMaiusculas(senhaValida) >= 1;
@@ -172,14 +196,10 @@ function senhaModerada(senhaValida) {
 /** - Uma senha forte tem mais de 12 caracteres, contendo mais de um caracter especial, mais de um número e mais de uma letra maiúscula.
  */
 function senhaForte(senhaValida) {
-    return nCaracteres(senhaValida.trim()) > 12
+    return senhaValida.trim().length > 12
         && nEspeciais(senhaValida) > 1
         && nNumeros(senhaValida) > 1
         && nMaiusculas(senhaValida) > 1;
-}
-
-function nCaracteres(string) {
-    return string.length;
 }
 
 function nEspeciais(string) {
